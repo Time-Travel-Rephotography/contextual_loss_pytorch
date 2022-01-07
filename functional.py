@@ -9,7 +9,8 @@ __all__ = ['contextual_loss', 'contextual_bilateral_loss']
 def contextual_loss(x: torch.Tensor,
                     y: torch.Tensor,
                     band_width: float = 0.5,
-                    loss_type: str = 'cosine'):
+                    loss_type: str = 'cosine',
+                    all_dist: bool = False):
     """
     Computes contextual loss between x and y.
     The most of this code is copied from
@@ -48,6 +49,9 @@ def contextual_loss(x: torch.Tensor,
 
     dist_tilde = compute_relative_distance(dist_raw)
     cx = compute_cx(dist_tilde, band_width)
+    if all_dist:
+        return cx
+
     cx = torch.mean(torch.max(cx, dim=1)[0], dim=1)  # Eq(1)
     cx_loss = torch.mean(-torch.log(cx + 1e-5))  # Eq(5)
 
@@ -159,7 +163,7 @@ def compute_l1_distance(x: torch.Tensor, y: torch.Tensor):
     y_vec = y.view(N, C, -1)
 
     dist = x_vec.unsqueeze(2) - y_vec.unsqueeze(3)
-    dist = dist.sum(dim=1).abs()
+    dist = dist.abs().sum(dim=1)
     dist = dist.transpose(1, 2).reshape(N, H*W, H*W)
     dist = dist.clamp(min=0.)
 
