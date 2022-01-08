@@ -35,6 +35,7 @@ class ContextualLoss(nn.Module):
             band_width: float = 0.5,
             loss_type: str = 'cosine',
             use_vgg: bool = False,
+            vgg_model: nn.Module = None,
             vgg_layers: List[str] = ['relu3_4'],
             feature_1d_size: int = 64,
     ):
@@ -50,7 +51,7 @@ class ContextualLoss(nn.Module):
         self.feature_1d_size = feature_1d_size
 
         if use_vgg:
-            self.vgg_model = VGG19()
+            self.vgg_model = VGG19() if vgg_model is None else vgg_model
             self.vgg_layers = vgg_layers
             self.register_buffer(
                 name='vgg_mean',
